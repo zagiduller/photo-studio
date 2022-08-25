@@ -37,6 +37,7 @@ func GetDB() *gorm.DB {
 			log.Fatal("GetDB: failed to connect database")
 		}
 		db = _db
+		log.Infof("GetDB: connected to database host(%s)", host)
 	})
 
 	return db

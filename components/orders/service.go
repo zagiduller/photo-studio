@@ -1,4 +1,4 @@
-package users
+package orders
 
 import (
 	"gorm.io/gorm"
@@ -6,25 +6,17 @@ import (
 )
 
 // @project photo-studio
-// @created 10.08.2022
+// @created 14.08.2022
 
 type Service struct {
 	db *gorm.DB
 }
 
-func New() *Service {
+func NewService() *Service {
 	return &Service{}
 }
+
 func (s *Service) Configure() error {
 	s.db = components.GetDB()
 	return nil
-}
-
-func (s *Service) NewUser() (*User, error) {
-	user := &User{
-		db:     s.db,
-		Status: UserStatusActive,
-	}
-
-	return user, nil
 }

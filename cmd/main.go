@@ -3,7 +3,6 @@ package main
 import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	psMinio "photostudio/components/minio"
 )
 
 // @project photo-studio
@@ -17,16 +16,15 @@ func init() {
 }
 
 func main() {
-	client, err := psMinio.CreateNewUserClient("Sibay")
-	if err != nil {
-		log.Fatal(err)
-		return
-	}
-	files, err := client.GetUserFiles()
-	if err != nil {
-		log.Error(err)
-	}
-	for i, file := range files {
-		log.Infof("%d) Location: %s ", i+1, file.Key)
-	}
+	// Миграции БД
+
+	// Главная страница. Создание заказа
+	// Храним информацию о заказе в БД
+	// Менеджер получает уведомление о новом заказе
+
+	// Менеджер видит заказ
+	// Менеджер может менять статус заказа
+
+	// Если заказ меняет статус - создаем пользователя из заказа
+	// Под заказ выделяется minio контейнер для файлов заказа
 }
