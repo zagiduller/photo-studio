@@ -28,10 +28,11 @@ var supportedStatuses = []OrderStatus{
 
 type Order struct {
 	gorm.Model
-	db          *gorm.DB
+	db *gorm.DB
+
 	Description string      `gorm:"type:varchar(255)" json:"description"`
 	Status      OrderStatus `gorm:"type:varchar(16)" json:"status"`
-	Manager     *users.User `json:"manager"`
+	Manager     users.User  `json:"manager"`
 }
 
 var (

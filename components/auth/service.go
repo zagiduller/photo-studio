@@ -11,6 +11,7 @@ import (
 	"gorm.io/gorm"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"photostudio/components"
 )
 
@@ -18,14 +19,17 @@ import (
 // @created 10.08.2022
 
 type Service struct {
+	components.Default
 	db            *gorm.DB
 	pk            *ecdsa.PrivateKey
 	pub           crypto.PublicKey
 	signingMethod *jwt.SigningMethodECDSA
 }
 
-func New() (*Service, error) {
-	return &Service{}, nil
+func New() *Service {
+	return &Service{
+		Default: components.New("auth"),
+	}
 }
 
 func (s *Service) Configure() error {
@@ -33,11 +37,14 @@ func (s *Service) Configure() error {
 	if pkPath == "" {
 		return fmt.Errorf("auth.Configure: privateKey is empty ")
 	}
-	db := components.GetDB()
-	if db == nil {
+	s.db = components.GetDB()
+	if s.db == nil {
 		return fmt.Errorf("auth.Configure: %w ", components.ErrorCodeDbIsNil)
 	}
-	s.db = db
+	// migrate model
+	if err := s.db.AutoMigrate(&Auth{}); err != nil {
+		return fmt.Errorf("auth.Configure: %w ", err)
+	}
 
 	pk, err := configurePrivateKey(pkPath)
 	if err != nil {
@@ -52,7 +59,11 @@ func (s *Service) Configure() error {
 
 // configurePrivateKey init Parse file and parse to ECDSA key
 func configurePrivateKey(pkPath string) (*ecdsa.PrivateKey, error) {
-	file, err := os.OpenFile(pkPath, os.O_RDONLY, os.ModeType)
+	path, err := filepath.Abs(pkPath)
+	if err != nil {
+		return nil, fmt.Errorf("auth.configurePrivateKey: %w ", err)
+	}
+	file, err := os.OpenFile(path, os.O_RDONLY, os.ModeType)
 	if err != nil {
 		return nil, fmt.Errorf("auth.ConfigurePrivateKey: %w ", err)
 	}

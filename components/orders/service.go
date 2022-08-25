@@ -1,6 +1,7 @@
 package orders
 
 import (
+	"fmt"
 	"gorm.io/gorm"
 	"photostudio/components"
 )
@@ -9,14 +10,24 @@ import (
 // @created 14.08.2022
 
 type Service struct {
+	components.Default
 	db *gorm.DB
 }
 
-func NewService() *Service {
-	return &Service{}
+func New() *Service {
+	return &Service{
+		Default: components.New("orders"),
+	}
 }
 
 func (s *Service) Configure() error {
 	s.db = components.GetDB()
+	if s.db == nil {
+		return fmt.Errorf("orders.Configure: %w ", components.ErrorCodeDbIsNil)
+	}
+	// migrate model
+	if err := s.db.AutoMigrate(&Order{}); err != nil {
+		return fmt.Errorf("orders.Configure: %w ", err)
+	}
 	return nil
 }

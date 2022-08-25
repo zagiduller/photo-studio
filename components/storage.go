@@ -12,8 +12,8 @@ import (
 // @project photo-studio
 // @created 10.08.2022
 
-var once = sync.Once{}
 var db *gorm.DB
+var once = sync.Once{}
 
 func GetDB() *gorm.DB {
 	once.Do(func() {
@@ -27,14 +27,15 @@ func GetDB() *gorm.DB {
 		var dialect gorm.Dialector
 		switch dbType {
 		case "postgres":
-			dialect = postgres.Open(fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s", host, port, user, dbName, password))
+			dsn := fmt.Sprintf("postgresql://%s:%s@%s:%s/%s", user, password, host, port, dbName)
+			dialect = postgres.Open(dsn)
 		default:
 			log.Fatal("GetDB: Unknown database type")
 		}
 
-		_db, err := gorm.Open(dialect, &gorm.Config{})
+		_db, err := gorm.Open(dialect)
 		if err != nil {
-			log.Fatal("GetDB: failed to connect database")
+			log.Fatalf("GetDB: failed to connect database: %s ", err)
 		}
 		db = _db
 		log.Infof("GetDB: connected to database host(%s)", host)
