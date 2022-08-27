@@ -1,8 +1,8 @@
 package auth
 
 import (
+	"github.com/zagiduller/photo-studio/components/users"
 	"gorm.io/gorm"
-	"photostudio/components/users"
 )
 
 // @project photo-studio

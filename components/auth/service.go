@@ -9,11 +9,11 @@ import (
 	"fmt"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/spf13/viper"
+	"github.com/zagiduller/photo-studio/components"
 	"gorm.io/gorm"
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"photostudio/components"
 )
 
 // @project photo-studio

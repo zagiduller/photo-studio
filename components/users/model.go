@@ -4,8 +4,8 @@ import (
 	"errors"
 	"fmt"
 	log "github.com/sirupsen/logrus"
+	"github.com/zagiduller/photo-studio/components"
 	"gorm.io/gorm"
-	"photostudio/components"
 )
 
 // @project photo-studio

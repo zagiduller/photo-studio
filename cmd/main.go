@@ -4,13 +4,13 @@ import (
 	"context"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+	"github.com/zagiduller/photo-studio/components"
+	"github.com/zagiduller/photo-studio/components/auth"
+	"github.com/zagiduller/photo-studio/components/orders"
+	"github.com/zagiduller/photo-studio/components/server"
+	"github.com/zagiduller/photo-studio/components/users"
 	"os"
 	"os/signal"
-	"photostudio/components"
-	"photostudio/components/auth"
-	"photostudio/components/orders"
-	"photostudio/components/server"
-	"photostudio/components/users"
 )
 
 // @project photo-studio

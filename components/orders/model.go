@@ -2,9 +2,9 @@ package orders
 
 import (
 	"errors"
+	"github.com/zagiduller/photo-studio/components"
+	"github.com/zagiduller/photo-studio/components/users"
 	"gorm.io/gorm"
-	"photostudio/components"
-	"photostudio/components/users"
 )
 
 // @project photo-studio

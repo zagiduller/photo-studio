@@ -3,8 +3,8 @@ package users
 import (
 	"context"
 	"fmt"
+	"github.com/zagiduller/photo-studio/components"
 	"gorm.io/gorm"
-	"photostudio/components"
 )
 
 // @project photo-studio

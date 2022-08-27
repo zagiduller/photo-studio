@@ -2,7 +2,7 @@ package auth
 
 import (
 	"github.com/golang-jwt/jwt/v4"
-	"photostudio/components/users"
+	"github.com/zagiduller/photo-studio/components/users"
 )
 
 // @project photo-studio

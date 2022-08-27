@@ -1,4 +1,4 @@
-module photostudio
+module github.com/zagiduller/photo-studio
 
 go 1.18
 

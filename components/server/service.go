@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/spf13/viper"
+	"github.com/zagiduller/photo-studio/components"
 	"net/http"
-	"photostudio/components"
 )
 
 // @project photo-studio
@@ -68,6 +68,7 @@ func (s *Service) ConfigureDependencies(components []components.Component) {
 
 func (s *Service) UsePreparable(prefix string, preparable MuxPreparable) {
 	path := fmt.Sprintf("/%s/", prefix)
-	s.rootRouter.PathPrefix(path).Handler(preparable.GetPreparedMux())
+	sub := s.rootRouter.PathPrefix(path).Subrouter()
+	sub.Handle("/", preparable.GetPreparedMux())
 	s.GetLogger().WithField("address", s.address+path).Info("use prepared mux")
 }
