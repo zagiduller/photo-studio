@@ -28,7 +28,7 @@ type (
 
 func New() *Service {
 	return &Service{
-		Default: components.Std("server"),
+		Default: components.DefaultComponent("server"),
 	}
 }
 

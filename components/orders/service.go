@@ -17,7 +17,7 @@ type Service struct {
 
 func New() *Service {
 	return &Service{
-		Default: components.Std("orders"),
+		Default: components.DefaultComponent("orders"),
 	}
 }
 

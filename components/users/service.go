@@ -17,7 +17,7 @@ type Service struct {
 
 func New() *Service {
 	return &Service{
-		Default: components.Std("users"),
+		Default: components.DefaultComponent("users"),
 	}
 }
 func (s *Service) Configure(ctx context.Context) error {

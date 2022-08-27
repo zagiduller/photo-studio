@@ -18,16 +18,16 @@ type (
 	ComponentDependable interface {
 		ConfigureDependencies([]Component)
 	}
-)
 
-type App struct {
-	ctx         context.Context
-	log         *logrus.Entry
-	name        string
-	version     string
-	startables  map[string]Startable
-	collections []Component
-}
+	App struct {
+		ctx         context.Context
+		log         *logrus.Entry
+		name        string
+		version     string
+		startables  map[string]Startable
+		collections []Component
+	}
+)
 
 func New(ctx context.Context, name, version string) *App {
 	return &App{

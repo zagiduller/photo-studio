@@ -20,7 +20,7 @@ type Component interface {
 	GetLogger() *logrus.Entry
 }
 
-func Std(name string) Default {
+func DefaultComponent(name string) Default {
 	return Default{
 		name: name,
 	}

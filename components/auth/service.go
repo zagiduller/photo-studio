@@ -29,7 +29,7 @@ type Service struct {
 
 func New() *Service {
 	return &Service{
-		Default: components.Std("auth"),
+		Default: components.DefaultComponent("auth"),
 	}
 }
 
