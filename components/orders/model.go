@@ -30,9 +30,10 @@ type Order struct {
 	gorm.Model
 	db *gorm.DB
 
-	Description string      `gorm:"type:varchar(255)" json:"description"`
 	Status      OrderStatus `gorm:"type:varchar(16)" json:"status"`
 	Manager     users.User  `json:"manager"`
+	ManagerID   uint        `json:"manager_id"`
+	Description string      `gorm:"type:varchar(255)" json:"description"`
 }
 
 var (

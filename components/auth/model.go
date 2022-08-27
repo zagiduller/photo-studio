@@ -12,6 +12,7 @@ type Auth struct {
 	gorm.Model
 	db *gorm.DB
 
-	Token string     `json:"token"`
-	User  users.User `json:"user"`
+	Token  string
+	UserID uint
+	User   users.User
 }

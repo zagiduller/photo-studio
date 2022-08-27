@@ -7,6 +7,7 @@ import (
 	"photostudio/components/auth"
 	"photostudio/components/orders"
 	"photostudio/components/users"
+	"time"
 )
 
 // @project photo-studio
@@ -26,11 +27,14 @@ func main() {
 		orders.New(),
 	}
 	for _, c := range collection {
+		start := time.Now()
 		if err := c.Configure(); err != nil {
 			log.Fatal(err)
 		}
+		c.GetLogger().
+			WithField("passed", time.Since(start)).
+			Info("Configured")
 	}
-	// Миграции БД
 
 	// Главная страница. Создание заказа
 	// Храним информацию о заказе в БД

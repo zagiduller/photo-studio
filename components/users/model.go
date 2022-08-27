@@ -27,7 +27,7 @@ type User struct {
 	db *gorm.DB
 
 	Status UserStatus `gorm:"type:varchar(12)" json:"status"`
-	Role   string     `gorm:"type:varchar(12)" json:"role"`
+	Role   string     `gorm:"type:varchar(12)" json:"role"` // TODO: should be unique
 	Login  string     `gorm:"unique;type:varchar(255)" json:"login"`
 	Email  string     `gorm:"unique;type:varchar(255)" json:"email"`
 }
