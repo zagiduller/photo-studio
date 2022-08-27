@@ -1,4 +1,4 @@
-package auth
+package access
 
 import (
 	"github.com/zagiduller/photo-studio/components/users"
@@ -8,7 +8,7 @@ import (
 // @project photo-studio
 // @created 10.08.2022
 
-type Auth struct {
+type Access struct {
 	gorm.Model
 	db *gorm.DB
 

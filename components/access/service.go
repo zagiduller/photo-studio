@@ -1,4 +1,4 @@
-package auth
+package access
 
 import (
 	"context"
@@ -29,28 +29,28 @@ type Service struct {
 
 func New() *Service {
 	return &Service{
-		Default: components.DefaultComponent("auth"),
+		Default: components.DefaultComponent("access"),
 	}
 }
 
 func (s *Service) Configure(ctx context.Context) error {
 	s.Default.Ctx = ctx
-	pkPath := viper.GetString("components.auth.privateKey")
+	pkPath := viper.GetString("components.access.privateKey")
 	if pkPath == "" {
-		return fmt.Errorf("auth.Configure: privateKey is empty ")
+		return fmt.Errorf("access.Configure: privateKey is empty ")
 	}
 	s.db = components.GetDB()
 	if s.db == nil {
-		return fmt.Errorf("auth.Configure: %w ", components.ErrorCodeDbIsNil)
+		return fmt.Errorf("access.Configure: %w ", components.ErrorCodeDbIsNil)
 	}
 	// migrate model
-	if err := s.db.AutoMigrate(&Auth{}); err != nil {
-		return fmt.Errorf("auth.Configure: %w ", err)
+	if err := s.db.AutoMigrate(&Access{}); err != nil {
+		return fmt.Errorf("access.Configure: %w ", err)
 	}
 
 	pk, err := configurePrivateKey(pkPath)
 	if err != nil {
-		return fmt.Errorf("auth.Configure: %w ", err)
+		return fmt.Errorf("access.Configure: %w ", err)
 	}
 
 	s.pk, s.pub = pk, pk.Public()
@@ -63,23 +63,23 @@ func (s *Service) Configure(ctx context.Context) error {
 func configurePrivateKey(pkPath string) (*ecdsa.PrivateKey, error) {
 	path, err := filepath.Abs(pkPath)
 	if err != nil {
-		return nil, fmt.Errorf("auth.configurePrivateKey: %w ", err)
+		return nil, fmt.Errorf("access.configurePrivateKey: %w ", err)
 	}
 	file, err := os.OpenFile(path, os.O_RDONLY, os.ModeType)
 	if err != nil {
-		return nil, fmt.Errorf("auth.ConfigurePrivateKey: %w ", err)
+		return nil, fmt.Errorf("access.ConfigurePrivateKey: %w ", err)
 	}
 	content, err := ioutil.ReadAll(file)
 	if err != nil {
-		return nil, fmt.Errorf("auth.ConfigurePrivateKey: %w ", err)
+		return nil, fmt.Errorf("access.ConfigurePrivateKey: %w ", err)
 	}
 	block, _ := pem.Decode(content)
 	if block == nil {
-		return nil, fmt.Errorf("auth.ConfigurePrivateKey: block is nil ")
+		return nil, fmt.Errorf("access.ConfigurePrivateKey: block is nil ")
 	}
 	signKey, err := x509.ParseECPrivateKey(block.Bytes)
 	if err != nil {
-		return nil, fmt.Errorf("auth.ConfigurePrivateKey: %w ", err)
+		return nil, fmt.Errorf("access.ConfigurePrivateKey: %w ", err)
 	}
 	return signKey, nil
 }

@@ -5,7 +5,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"github.com/zagiduller/photo-studio/components"
-	"github.com/zagiduller/photo-studio/components/auth"
+	"github.com/zagiduller/photo-studio/components/access"
 	"github.com/zagiduller/photo-studio/components/orders"
 	"github.com/zagiduller/photo-studio/components/server"
 	"github.com/zagiduller/photo-studio/components/users"
@@ -24,7 +24,7 @@ func main() {
 		"0.0.1",
 	)
 	must(app.Add(
-		auth.New(),
+		access.New(),
 		users.New(),
 		orders.New(),
 		server.New(),

@@ -10,8 +10,10 @@ import (
 
 func (s *Service) GetPreparedMux() http.Handler {
 	r := mux.NewRouter()
-	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("New order"))
-	})
+	r.HandleFunc("/orders/", func(w http.ResponseWriter, r *http.Request) {
+		// it can call only manager
+		w.Write([]byte("Get orders"))
+	}).Methods("GET")
+
 	return r
 }
