@@ -13,15 +13,17 @@ import (
 // @created 27.08.2022
 
 type (
-	MuxPreparable interface {
-		GetPreparedMux() http.Handler
+	RouterFillable interface {
+		FillRouter(r, p *mux.Router)
 	}
 
 	Service struct {
-		port       int
-		address    string
-		rootRouter *mux.Router
-		server     http.Server
+		port     int
+		address  string
+		rRoot    *mux.Router
+		rPublic  *mux.Router
+		rPrivate *mux.Router
+		server   http.Server
 		components.Default
 	}
 )
@@ -34,7 +36,10 @@ func New() *Service {
 
 func (s *Service) Configure(ctx context.Context) error {
 	s.Default.Ctx = ctx
-	s.rootRouter = mux.NewRouter()
+
+	s.rRoot = mux.NewRouter()
+	s.rPublic = s.rRoot.PathPrefix("/").Subrouter()
+	s.rPrivate = s.rRoot.PathPrefix("/-/").Subrouter()
 
 	s.port = viper.GetInt("components.server.port")
 	if s.port == 0 {
@@ -43,7 +48,7 @@ func (s *Service) Configure(ctx context.Context) error {
 	s.address = fmt.Sprintf("http://localhost:%d", s.port)
 	s.server = http.Server{
 		Addr:    fmt.Sprintf(":%d", s.port),
-		Handler: s.rootRouter,
+		Handler: s.rRoot,
 	}
 	return nil
 }
@@ -59,16 +64,18 @@ func (s *Service) Stop() error {
 
 func (s *Service) ConfigureDependencies(components []components.Component) {
 	for _, c := range components {
-		preparable, ok := c.(MuxPreparable)
+		fillable, ok := c.(RouterFillable)
 		if ok {
-			s.UsePreparable(c.GetName(), preparable)
+			s.fillRouter(c.GetName(), fillable)
 		}
 	}
 }
 
-func (s *Service) UsePreparable(prefix string, preparable MuxPreparable) {
+func (s *Service) fillRouter(prefix string, preparable RouterFillable) {
 	path := fmt.Sprintf("/%s/", prefix)
-	sub := s.rootRouter.PathPrefix(path).Subrouter()
-	sub.Handle("/", preparable.GetPreparedMux())
+	preparable.FillRouter(
+		s.rPublic.PathPrefix(path).Subrouter(),
+		s.rPrivate.PathPrefix(path).Subrouter(),
+	)
 	s.GetLogger().WithField("address", s.address+path).Info("use prepared mux")
 }

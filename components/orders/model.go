@@ -52,9 +52,6 @@ func (o *Order) Validate() error {
 	if !o.CheckStatusIsValid() {
 		return ValidateErrorCodeUnsupportedStatus
 	}
-	//if o.Owner == nil {
-	//	return ValidateErrorOwnerIsNil
-	//}
 
 	return nil
 }

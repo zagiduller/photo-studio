@@ -8,12 +8,13 @@ import (
 // @project photo-studio
 // @created 27.08.2022
 
-func (s *Service) GetPreparedMux() http.Handler {
-	r := mux.NewRouter()
-	r.HandleFunc("/orders/", func(w http.ResponseWriter, r *http.Request) {
+func (s *Service) FillRouter(r, p *mux.Router) {
+	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		// it can call only manager
 		w.Write([]byte("Get orders"))
 	}).Methods("GET")
-
-	return r
+	p.HandleFunc("/1/", func(w http.ResponseWriter, r *http.Request) {
+		// it can call only manager
+		w.Write([]byte("Get First orders"))
+	}).Methods("GET")
 }
