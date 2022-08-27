@@ -1,6 +1,7 @@
 package orders
 
 import (
+	"context"
 	"fmt"
 	"gorm.io/gorm"
 	"photostudio/components"
@@ -16,11 +17,12 @@ type Service struct {
 
 func New() *Service {
 	return &Service{
-		Default: components.New("orders"),
+		Default: components.Std("orders"),
 	}
 }
 
-func (s *Service) Configure() error {
+func (s *Service) Configure(ctx context.Context) error {
+	s.Default.Ctx = ctx
 	s.db = components.GetDB()
 	if s.db == nil {
 		return fmt.Errorf("orders.Configure: %w ", components.ErrorCodeDbIsNil)

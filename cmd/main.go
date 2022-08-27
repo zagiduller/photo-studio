@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"photostudio/components"
@@ -13,28 +14,26 @@ import (
 // @project photo-studio
 // @created 27.07.2022
 
-func init() {
-	viper.SetConfigFile("config.yaml")
-	if err := viper.ReadInConfig(); err != nil {
-		log.Fatal(err)
-	}
-}
-
 func main() {
-	collection := []components.Component{
+	ctx, cancel := context.WithCancel(context.Background())
+	app := components.New(
+		ctx,
+		"photo-studio",
+		"0.0.1",
+	)
+	must(app.Add(
 		auth.New(),
 		users.New(),
 		orders.New(),
-	}
-	for _, c := range collection {
-		start := time.Now()
-		if err := c.Configure(); err != nil {
-			log.Fatal(err)
-		}
-		c.GetLogger().
-			WithField("passed", time.Since(start)).
-			Info("Configured")
-	}
+	))
+	must(app.Configure())
+
+	go app.Start()
+
+	time.Sleep(1 * time.Second)
+	// Остановка приложения
+	cancel()
+	time.Sleep(1 * time.Second)
 
 	// Главная страница. Создание заказа
 	// Храним информацию о заказе в БД
@@ -45,4 +44,17 @@ func main() {
 
 	// Если заказ меняет статус - создаем пользователя из заказа
 	// Под заказ выделяется minio контейнер для файлов заказа
+}
+
+func init() {
+	viper.SetConfigFile("config.yaml")
+	if err := viper.ReadInConfig(); err != nil {
+		log.Fatal(err)
+	}
+}
+
+func must(err error) {
+	if err != nil {
+		log.Fatal(err)
+	}
 }

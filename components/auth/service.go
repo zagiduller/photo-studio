@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"context"
 	"crypto"
 	"crypto/ecdsa"
 	"crypto/x509"
@@ -28,11 +29,12 @@ type Service struct {
 
 func New() *Service {
 	return &Service{
-		Default: components.New("auth"),
+		Default: components.Std("auth"),
 	}
 }
 
-func (s *Service) Configure() error {
+func (s *Service) Configure(ctx context.Context) error {
+	s.Default.Ctx = ctx
 	pkPath := viper.GetString("components.auth.privateKey")
 	if pkPath == "" {
 		return fmt.Errorf("auth.Configure: privateKey is empty ")

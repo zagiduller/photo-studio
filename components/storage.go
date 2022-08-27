@@ -21,7 +21,7 @@ func GetDB() *gorm.DB {
 		host := viper.GetString("components.db.host")
 		port := viper.GetString("components.db.port")
 		user := viper.GetString("components.db.user")
-		dbName := viper.GetString("components.db.dbname")
+		dbName := viper.GetString("components.db.database")
 		password := viper.GetString("components.db.password")
 
 		var dialect gorm.Dialector
@@ -38,7 +38,13 @@ func GetDB() *gorm.DB {
 			log.Fatalf("GetDB: failed to connect database: %s ", err)
 		}
 		db = _db
-		log.Infof("GetDB: connected to database host(%s)", host)
+		log.WithFields(log.Fields{
+			"port": port,
+			"host": host,
+			"user": user,
+			"db":   dbName,
+			"type": dbType,
+		}).Infof("connected")
 	})
 
 	return db

@@ -1,6 +1,7 @@
 package components
 
 import (
+	"context"
 	"errors"
 	"github.com/sirupsen/logrus"
 )
@@ -14,17 +15,20 @@ var (
 
 type Component interface {
 	GetName() string
-	Configure() error
+	Configure(ctx context.Context) error
+	SetLogger(*logrus.Entry)
 	GetLogger() *logrus.Entry
 }
 
-func New(name string) Default {
+func Std(name string) Default {
 	return Default{
 		name: name,
 	}
 }
 
 type Default struct {
+	Ctx  context.Context
+	log  *logrus.Entry
 	name string
 }
 
@@ -39,6 +43,13 @@ func (d *Default) Configure() error {
 	return nil
 }
 
+func (d *Default) SetLogger(log *logrus.Entry) {
+	d.log = log.WithField("component", d.GetName())
+}
+
 func (d *Default) GetLogger() *logrus.Entry {
-	return logrus.StandardLogger().WithField("component", d.name)
+	if d.log == nil {
+		d.SetLogger(logrus.NewEntry(logrus.New()))
+	}
+	return d.log
 }
