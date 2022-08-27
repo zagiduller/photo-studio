@@ -2,8 +2,8 @@ package orders
 
 import (
 	"errors"
+	"fmt"
 	"github.com/zagiduller/photo-studio/components"
-	"github.com/zagiduller/photo-studio/components/users"
 	"gorm.io/gorm"
 )
 
@@ -31,7 +31,6 @@ type Order struct {
 	db *gorm.DB
 
 	Status      OrderStatus `gorm:"type:varchar(16)" json:"status"`
-	Manager     users.User  `json:"manager"`
 	ManagerID   uint        `json:"manager_id"`
 	Description string      `gorm:"type:varchar(255)" json:"description"`
 }
@@ -63,4 +62,14 @@ func (o *Order) CheckStatusIsValid() bool {
 		}
 	}
 	return false
+}
+
+func (o *Order) Save() error {
+	if err := o.Validate(); err != nil {
+		return fmt.Errorf("orders.Save: %w ", err)
+	}
+	if err := o.db.Save(o).Error; err != nil {
+		return fmt.Errorf("orders.Save: %w ", err)
+	}
+	return nil
 }
