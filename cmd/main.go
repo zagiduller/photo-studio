@@ -4,11 +4,13 @@ import (
 	"context"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+	"os"
+	"os/signal"
 	"photostudio/components"
 	"photostudio/components/auth"
 	"photostudio/components/orders"
+	"photostudio/components/server"
 	"photostudio/components/users"
-	"time"
 )
 
 // @project photo-studio
@@ -25,15 +27,21 @@ func main() {
 		auth.New(),
 		users.New(),
 		orders.New(),
+		server.New(),
 	))
 	must(app.Configure())
 
-	go app.Start()
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+	go func() {
+		for sig := range c {
+			// sig is a ^C, handle it
+			log.WithField("signal", sig.String()).Warn("shutting down...")
+			cancel()
+		}
+	}()
 
-	time.Sleep(1 * time.Second)
-	// Остановка приложения
-	cancel()
-	time.Sleep(1 * time.Second)
+	log.Error(app.Start())
 
 	// Главная страница. Создание заказа
 	// Храним информацию о заказе в БД
