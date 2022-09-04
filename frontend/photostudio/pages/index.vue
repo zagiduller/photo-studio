@@ -39,6 +39,7 @@
                   description="Как к Вам обращаться?"
                   label="Имя"
                   label-for="input-horizontal"
+                  valid-feedback="Готово!"
                 >
                   <b-form-input id="inputEmail" v-model="name" type="email" />
                 </b-form-group>
@@ -50,9 +51,11 @@
                       content-cols-sm="12"
                       label-cols-lg="4"
                       content-cols-lg="8"
-                      description="Номер телефона для связи"
                       label="Телефон"
                       label-for="input-horizontal"
+                      valid-feedback="Готово!"
+                      :invalid-feedback="invalidPhoneFeedback"
+                      :state="statePhone"
                     >
                       <b-form-input id="inputPhone" v-model="phone" size="sm" type="tel" />
                     </b-form-group>
@@ -64,11 +67,13 @@
                       content-cols-lg="8"
                       label-cols-sm="12"
                       content-cols-sm="12"
-                      description="Электронная почта для связи"
                       label="Почта"
                       label-for="input-horizontal"
                       label-align-md="right"
                       label-class="pr-md-4"
+                      valid-feedback="Готово!"
+                      :invalid-feedback="invalidEmailFeedback"
+                      :state="stateEmail"
                     >
                       <b-form-input id="inputEmail" v-model="email" size="sm" type="email" />
                     </b-form-group>
@@ -80,7 +85,7 @@
                   label-for="inputDescription"
                   label="Комментарий к заказу"
                 >
-                  <b-form-textarea id="inputDescription" rows="5" v-model="phone" type="tel" />
+                  <b-form-textarea id="inputDescription" v-model="description" rows="5" type="tel" />
                 </b-form-group>
               </div>
             </div>
@@ -113,8 +118,29 @@ export default {
     }
   },
   computed: {
-    currentCity () {
-      return this.cities[this.city]
+    stateEmail () {
+      return this.email.length > 4
+    },
+    statePhone () {
+      return this.phone.length > 4
+    },
+    invalidPhoneFeedback () {
+      if (this.phone.length === 0) {
+        if (this.stateEmail) {
+          return ''
+        }
+        return 'Введите телефон для связи'
+      }
+      return 'Введите корректный телефон'
+    },
+    invalidEmailFeedback () {
+      if (this.email.length === 0) {
+        if (this.statePhone) {
+          return ''
+        }
+        return 'Введите почту для связи'
+      }
+      return 'Почта должна быть правильной'
     }
   },
   methods: {

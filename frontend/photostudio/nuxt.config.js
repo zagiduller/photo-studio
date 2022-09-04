@@ -52,6 +52,7 @@ export default {
       'IconsPlugin',
       'ButtonPlugin',
       'OverlayPlugin',
+      'SkeletonPlugin',
       'FormInputPlugin',
       'FormGroupPlugin',
       'FormTextareaPlugin',

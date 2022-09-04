@@ -38,6 +38,8 @@ func (s *Service) Configure(ctx context.Context) error {
 	s.Default.Ctx = ctx
 
 	s.rRoot = mux.NewRouter()
+	s.rRoot.Use(AllowCORS)
+
 	s.rPublic = s.rRoot.PathPrefix("/").Subrouter()
 	s.rPrivate = s.rRoot.PathPrefix("/-/").Subrouter()
 
