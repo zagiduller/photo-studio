@@ -42,11 +42,14 @@ func (s *Service) GetAll() ([]*Order, error) {
 	return orders, nil
 }
 
-func (s *Service) Create(description string) (*Order, error) {
+func (s *Service) Create(phone, email, description, name string) (*Order, error) {
 	order := &Order{
-		db:          s.db,
-		Description: description,
-		Status:      OrderStatusNew,
+		db:           s.db,
+		Email:        email,
+		Phone:        phone,
+		Description:  description,
+		CustomerName: name,
+		Status:       OrderStatusNew,
 	}
 	if err := order.Validate(); err != nil {
 		return nil, fmt.Errorf("orders.Create: %w ", err)

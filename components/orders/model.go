@@ -30,15 +30,19 @@ type Order struct {
 	gorm.Model
 	db *gorm.DB
 
-	Status      OrderStatus `gorm:"type:varchar(16)" json:"status"`
-	ManagerID   uint        `json:"manager_id"`
-	Description string      `gorm:"type:varchar(255)" json:"description"`
+	Status       OrderStatus `gorm:"type:varchar(16)" json:"status"`
+	ManagerID    uint        `json:"manager_id"`
+	Description  string      `gorm:"type:varchar(255)" json:"description"`
+	Email        string      `gorm:"type:varchar(255)" json:"email"`
+	Phone        string      `gorm:"type:varchar(255)" json:"phone"`
+	CustomerName string      `gorm:"type:varchar(255)" json:"customer_name"`
 }
 
 var (
-	ValidateErrorOwnerIsNil            = errors.New("orders: owner is nil")
-	ValidateErrorCodeOrderIsNil        = errors.New("orders: order is nil")
-	ValidateErrorCodeUnsupportedStatus = errors.New("orders: status is not supported")
+	ValidateErrorOwnerIsNil              = errors.New("orders: owner is nil")
+	ValidateErrorCodeOrderIsNil          = errors.New("orders: order is nil")
+	ValidateErrorCodeUnsupportedStatus   = errors.New("orders: status is not supported")
+	ValidateErrorCodeEmailOrNameRequired = errors.New("orders: email or name is required")
 )
 
 func (o *Order) Validate() error {
@@ -47,6 +51,9 @@ func (o *Order) Validate() error {
 	}
 	if o.db == nil {
 		return components.ErrorCodeDbIsNil
+	}
+	if o.Email == "" && o.Phone == "" {
+		return ValidateErrorCodeEmailOrNameRequired
 	}
 	if !o.CheckStatusIsValid() {
 		return ValidateErrorCodeUnsupportedStatus

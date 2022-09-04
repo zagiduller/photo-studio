@@ -2,8 +2,10 @@ package orders
 
 import (
 	"encoding/json"
+	"errors"
 	"github.com/gorilla/mux"
 	"net/http"
+	"strings"
 )
 
 // @project photo-studio
@@ -34,7 +36,17 @@ func (s *Service) GetOrdersHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 type CreateOrderRequest struct {
+	Name        string `json:"name"`
+	Email       string `json:"email"`
+	Phone       string `json:"phone"`
 	Description string `json:"description"`
+}
+
+func (r *CreateOrderRequest) Validate() error {
+	if r.Email == "" && r.Phone == "" {
+		return errors.New("CreateOrderRequest: email and phone are empty")
+	}
+	return nil
 }
 
 type CreateOrderResponse struct {
@@ -47,7 +59,20 @@ func (s *Service) CreateOrderHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	order, err := s.Create(request.Description)
+	if err := request.Validate(); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	if request.Name == "" {
+		request.Name = "Инкогнито"
+	}
+
+	order, err := s.Create(
+		strings.TrimSpace(request.Phone),
+		strings.TrimSpace(request.Email),
+		strings.TrimSpace(request.Name),
+		strings.TrimSpace(request.Description),
+	)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

@@ -46,7 +46,16 @@ export default {
 
   bootstrapVue: {
     // Add the icon plugin to the `componentsPlugins` array
-    componentPlugins: ['IconsPlugin', 'Image', 'VBHover', 'OverlayPlugin', 'ButtonPlugin']
+    componentPlugins: [
+      'Image',
+      'VBHover',
+      'IconsPlugin',
+      'ButtonPlugin',
+      'OverlayPlugin',
+      'FormInputPlugin',
+      'FormGroupPlugin',
+      'FormTextareaPlugin',
+    ]
   },
 
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
