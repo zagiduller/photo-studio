@@ -1,3 +1,5 @@
+const apiUrl = process.env.API_URL || 'http://localhost:8080'
+
 export default {
   // Disable server-side rendering: https://go.nuxtjs.dev/ssr-mode
   ssr: false,
@@ -41,7 +43,9 @@ export default {
     // https://go.nuxtjs.dev/pwa
     '@nuxtjs/pwa',
     // '@storefront-ui/vue',
-    'bootstrap-vue/nuxt'
+    'bootstrap-vue/nuxt',
+
+    '@nuxtjs/auth-next'
   ],
 
   bootstrapVue: {
@@ -50,19 +54,46 @@ export default {
       'Image',
       'VBHover',
       'IconsPlugin',
+      'ModalPlugin',
       'ButtonPlugin',
       'OverlayPlugin',
       'SkeletonPlugin',
       'FormInputPlugin',
       'FormGroupPlugin',
-      'FormTextareaPlugin',
+      'FormTextareaPlugin'
     ]
   },
 
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
   axios: {
     // Workaround to avoid enforcing hard-coded localhost:3000: https://github.com/nuxt-community/axios-module/issues/308
-    baseURL: '/'
+    baseURL: apiUrl
+  },
+
+  router: {
+    middleware: ['auth']
+  },
+
+  auth: {
+    strategies: {
+      local: {
+        token: {
+          property: 'token',
+          global: true,
+          // required: true,
+          type: 'Bearer'
+        },
+        user: {
+          property: 'user'
+          // autoFetch: true
+        },
+        endpoints: {
+          login: { url: apiUrl + '/access/login', method: 'post' },
+          logout: { url: apiUrl + '/access/logout', method: 'post' },
+          user: { url: apiUrl + '/access/info', method: 'get' }
+        }
+      }
+    }
   },
 
   // PWA module configuration: https://go.nuxtjs.dev/pwa

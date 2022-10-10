@@ -1,5 +1,17 @@
 <template>
   <div class="row mt-3">
+    <b-modal id="order-result" hide-footer>
+      <template #modal-title>
+        Результат
+      </template>
+      <div class="d-block text-center">
+        <h3>{{ order }}</h3>
+        <h3>{{ error }}</h3>
+      </div>
+      <b-button class="mt-3" block @click="$bvModal.hide('order-result')">
+        Close Me
+      </b-button>
+    </b-modal>
     <div v-b-hover="imgHover" class="col-sm-12 col-md-6">
       <b-overlay :show="imgHovered" opacity="0.7">
         <b-img-lazy src="https://picsum.photos/1000/850" fluid alt="Здесь грузится картинка" />
@@ -41,7 +53,7 @@
                   label-for="input-horizontal"
                   valid-feedback="Готово!"
                 >
-                  <b-form-input id="inputEmail" v-model="name" type="email" />
+                  <b-form-input id="inputName" v-model="name" type="text" />
                 </b-form-group>
                 <div class="row mt-5">
                   <div class="col-md-6 col-sm-12">
@@ -91,7 +103,14 @@
             </div>
             <hr class="my-4">
             <p>Опишите ваш заказ, оставьте телефон или почту и мы с вами свяжемся</p>
-            <a class="btn btn-primary btn-lg" href="#" role="button">Отправить заявку</a>
+            <b-button
+              size="lg"
+              :variant="!stateEmail && !statePhone ? '' : 'primary'"
+              :disabled="!stateEmail && !statePhone"
+              @click="newOrder"
+            >
+              Отправить
+            </b-button>
           </div>
         </div>
       </div>
@@ -102,18 +121,15 @@
 <script>
 export default {
   name: 'IndexPage',
+  auth: false,
   data () {
     return {
+      order: {},
+      error: '',
+      name: '',
       email: '',
       phone: '',
       description: '',
-      city: 0,
-      cities: [
-        'Сибай',
-        'Уфа',
-        'Магнитогорск',
-        'Белорецк'
-      ],
       imgHovered: false
     }
   },
@@ -147,16 +163,23 @@ export default {
     imgHover (isHovered) {
       this.imgHovered = isHovered
     },
-    prevCity () {
-      this.city--
-      if (this.city < 0) {
-        this.city = this.cities.length - 1
-      }
-    },
-    nextCity () {
-      this.city++
-      if (this.city >= this.cities.length) {
-        this.city = 0
+    async newOrder () {
+      this.error = ''
+      if (this.statePhone || this.stateEmail) {
+        try {
+          const order = await this.$axios.post('/orders/', {
+            name: this.name,
+            email: this.email,
+            phone: this.phone,
+            description: this.description
+          })
+          console.log(order)
+          this.order = order
+        } catch (e) {
+          this.error = e.response.data
+          console.log(e)
+        }
+        this.$bvModal.show('order-result')
       }
     }
   }

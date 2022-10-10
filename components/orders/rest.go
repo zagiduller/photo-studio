@@ -3,8 +3,11 @@ package orders
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/gorilla/mux"
 	"net/http"
+	"net/mail"
+	"regexp"
 	"strings"
 )
 
@@ -12,15 +15,15 @@ import (
 // @created 27.08.2022
 
 func (s *Service) FillRouter(r, p *mux.Router) {
-	r.HandleFunc("/", s.CreateOrderHandler).Methods("POST")
-	p.HandleFunc("/", s.GetOrdersHandler).Methods("GET")
+	r.HandleFunc("/", s.CreateOrderHandler).Methods(http.MethodPost, http.MethodOptions)
+	p.HandleFunc("/", s.GetOrdersHandler).Methods(http.MethodGet, http.MethodOptions)
 }
 
 type GetOrdersResponse struct {
 	Orders []*Order `json:"orders"`
 }
 
-func (s *Service) GetOrdersHandler(w http.ResponseWriter, r *http.Request) {
+func (s *Service) GetOrdersHandler(w http.ResponseWriter, _ *http.Request) {
 	var response GetOrdersResponse
 	orders, err := s.GetAll()
 	if err != nil {
@@ -35,6 +38,8 @@ func (s *Service) GetOrdersHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+var rePhone = regexp.MustCompile(`^(?:(?:\(?(?:00|\+)([1-4]\d\d|[1-9]\d?)\)?)?[\-\.\ \\\/]?)?((?:\(?\d{1,}\)?[\-\.\ \\\/]?){0,})(?:[\-\.\ \\\/]?(?:#|ext\.?|extension|x)[\-\.\ \\\/]?(\d+))?$`)
+
 type CreateOrderRequest struct {
 	Name        string `json:"name"`
 	Email       string `json:"email"`
@@ -43,9 +48,19 @@ type CreateOrderRequest struct {
 }
 
 func (r *CreateOrderRequest) Validate() error {
-	if r.Email == "" && r.Phone == "" {
+	email, phone := strings.TrimSpace(r.Email), strings.TrimSpace(r.Phone)
+	if email == "" && phone == "" {
 		return errors.New("CreateOrderRequest: email and phone are empty")
 	}
+	if email != "" {
+		if _, err := mail.ParseAddress(email); err != nil {
+			return fmt.Errorf("CreateOrderRequest: [%w]", err)
+		}
+	}
+	if phone != "" && rePhone.MatchString(phone) {
+		return errors.New("CreateOrderRequest: phone not valid")
+	}
+
 	return nil
 }
 
@@ -70,8 +85,8 @@ func (s *Service) CreateOrderHandler(w http.ResponseWriter, r *http.Request) {
 	order, err := s.Create(
 		strings.TrimSpace(request.Phone),
 		strings.TrimSpace(request.Email),
-		strings.TrimSpace(request.Name),
 		strings.TrimSpace(request.Description),
+		strings.TrimSpace(request.Name),
 	)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -82,5 +97,6 @@ func (s *Service) CreateOrderHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	if err := json.NewEncoder(w).Encode(response); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 }
