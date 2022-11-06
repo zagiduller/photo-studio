@@ -5,7 +5,6 @@ import (
 	"fmt"
 	log "github.com/sirupsen/logrus"
 	"github.com/zagiduller/photo-studio/components"
-	"gorm.io/gorm"
 )
 
 // @project photo-studio
@@ -17,24 +16,19 @@ const (
 	UserStatusActive   UserStatus = "active"
 	UserStatusInactive UserStatus = "inactive"
 
-	RoleAdmin    = "admin"
-	RoleCustomer = "customer"
+	RoleAdmin = "admin"
+	RoleUser  = "user"
 )
 
 // User was described
 type User struct {
-	gorm.Model
-	db *gorm.DB
+	components.Model
 
 	Status UserStatus `gorm:"type:varchar(12)" json:"status"`
-	Role   string     `gorm:"type:varchar(12)" json:"role"` // TODO: should be unique
-	Login  string     `gorm:"unique;type:varchar(255)" json:"login"`
-	Email  string     `gorm:"unique;type:varchar(255)" json:"email"`
+	Role   string     `gorm:"type:varchar(12)" json:"role"`
 }
 
 var (
-	ValidateErrorCodeInvalidLogin  = errors.New("Login is invalid ")
-	ValidateErrorCodeInvalidEmail  = errors.New("Email is invalid ")
 	ValidateErrorCodeInvalidStatus = errors.New("Status is invalid ")
 	ValidateErrorNilUser           = errors.New("User is nil ")
 	ValidateErrorCodeInvalidRole   = errors.New("Role is invalid ")
@@ -45,31 +39,28 @@ var (
 
 func (u *User) Validate() error {
 	if u == nil {
-		return fmt.Errorf("Validate: %w ", ValidateErrorNilUser)
+		return fmt.Errorf("User.Validate: [%w] ", ValidateErrorNilUser)
 	}
-	if u.db == nil {
-		return fmt.Errorf("Validate: %w ", components.ErrorCodeDbIsNil)
-	}
-	if u.Login == "" {
-		return fmt.Errorf("Validate: %w ", ValidateErrorCodeInvalidLogin)
+	if u.GetDB() == nil {
+		return fmt.Errorf("User.Validate: [%w] ", components.ErrorCodeDbIsNil)
 	}
 	if u.Status == "" {
-		return fmt.Errorf("Validate: %w ", ValidateErrorCodeInvalidStatus)
+		return fmt.Errorf("User.Validate: [%w] ", ValidateErrorCodeInvalidStatus)
 	}
 	if u.Role == "" {
-		return fmt.Errorf("Validate: %w ", ValidateErrorCodeInvalidRole)
+		return fmt.Errorf("User.Validate: [%w] ", ValidateErrorCodeInvalidRole)
 	}
 	return nil
 }
 
 func (u *User) Save() error {
 	if err := u.Validate(); err != nil {
-		return fmt.Errorf("Save: %w ", err)
+		return fmt.Errorf("User.Save: [%w] ", err)
 	}
-	if err := u.db.Save(u).Error; err != nil {
-		return fmt.Errorf("Save: %w ", err)
+	if err := u.GetDB().Save(u).Error; err != nil {
+		return fmt.Errorf("User.Save: [%w] ", err)
 	}
-	log.Infof("Save: User saved: %d %s ", u.ID, u.Login)
+	log.Infof("User.Save: id(%d) ", u.ID)
 	return nil
 }
 

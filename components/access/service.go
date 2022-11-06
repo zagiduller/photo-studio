@@ -8,12 +8,15 @@ import (
 	"encoding/pem"
 	"fmt"
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/google/uuid"
 	"github.com/spf13/viper"
 	"github.com/zagiduller/photo-studio/components"
+	"github.com/zagiduller/photo-studio/components/users"
 	"gorm.io/gorm"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"time"
 )
 
 // @project photo-studio
@@ -21,11 +24,26 @@ import (
 
 type Service struct {
 	components.Default
-	db            *gorm.DB
-	pk            *ecdsa.PrivateKey
-	pub           crypto.PublicKey
-	signingMethod *jwt.SigningMethodECDSA
+	db  *gorm.DB
+	pk  *ecdsa.PrivateKey
+	pub crypto.PublicKey
+
+	users *users.Service
 }
+
+func (s *Service) ConfigureDependencies(components []components.Component) {
+	for _, c := range components {
+		if srv, ok := c.(*users.Service); ok {
+			s.users = srv
+			s.GetLogger().
+				WithField("dependency", srv.GetName()).
+				Infof("ConfigureDependencies")
+			break
+		}
+	}
+}
+
+var signingMethod = jwt.SigningMethodES256
 
 func New() *Service {
 	return &Service{
@@ -44,7 +62,7 @@ func (s *Service) Configure(ctx context.Context) error {
 		return fmt.Errorf("access.Configure: %w ", components.ErrorCodeDbIsNil)
 	}
 	// migrate model
-	if err := s.db.AutoMigrate(&Access{}); err != nil {
+	if err := s.db.AutoMigrate(&Access{}, &Password{}, &Login{}); err != nil {
 		return fmt.Errorf("access.Configure: %w ", err)
 	}
 
@@ -54,7 +72,6 @@ func (s *Service) Configure(ctx context.Context) error {
 	}
 
 	s.pk, s.pub = pk, pk.Public()
-	s.signingMethod = jwt.SigningMethodES256
 
 	return nil
 }
@@ -85,8 +102,59 @@ func configurePrivateKey(pkPath string) (*ecdsa.PrivateKey, error) {
 }
 
 func (s *Service) CreateToken(custom jwt.Claims) (string, error) {
-	t := jwt.New(s.signingMethod)
+	t := jwt.New(signingMethod)
 
 	t.Claims = custom
 	return t.SignedString(s.pk)
+}
+
+func (s *Service) CreateTokenByLogin(login *Login) (*Access, error) {
+	if login == nil || login.GetUser() == nil {
+		return nil, fmt.Errorf("CreateTokenByUser: [%w] ", components.ErrModelIsNil)
+	}
+	user := login.GetUser()
+	sess := uuid.NewString()
+	tokenString, err := s.CreateToken(Claims{
+		RegisteredClaims: &jwt.RegisteredClaims{
+			Issuer:    s.GetName(),
+			Audience:  nil,
+			NotBefore: nil,
+			Subject:   fmt.Sprintf("%d", login.ID),
+			ExpiresAt: &jwt.NumericDate{Time: time.Now().AddDate(0, 1, 0)},
+			IssuedAt:  &jwt.NumericDate{Time: time.Now()},
+			ID:        sess,
+		},
+		User: user.GetClaims(),
+	})
+	if err != nil {
+		return nil, fmt.Errorf("CreateTokenByUser: [%w]", err)
+	}
+	token := NewAccess(user.ID, tokenString)
+	token.SessionID = sess
+	token.SetDB(user.GetDB())
+	if _, err := s.ValidateToken(tokenString); err != nil {
+		return nil, fmt.Errorf("CreateTokenByUser: [%w]", err)
+	}
+
+	if err := token.Save(); err != nil {
+		return nil, fmt.Errorf("CreateTokenByUser: [%w]", err)
+	}
+	return token, nil
+}
+
+// ValidateToken validates the token and returns the claims
+func (s *Service) ValidateToken(token string) (*jwt.Token, error) {
+	t, err := jwt.ParseWithClaims(token, &Claims{}, func(token *jwt.Token) (interface{}, error) {
+		if signingMethod != token.Method {
+			return nil, fmt.Errorf("ValidateToken: Unexpected signing method: %v ", token.Header["alg"])
+		}
+		return s.pub, nil
+	})
+	if err != nil {
+		return nil, fmt.Errorf("ValidateToken: %s ", err)
+	}
+	if !t.Valid {
+		return nil, fmt.Errorf("ValidateToken: [%w] ", ErrInvalidAccessToken)
+	}
+	return t, nil
 }

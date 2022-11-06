@@ -1,6 +1,7 @@
 package components
 
 import (
+	"errors"
 	"fmt"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
@@ -12,15 +13,20 @@ import (
 // @project photo-studio
 // @created 10.08.2022
 
-var db *gorm.DB
-var once = sync.Once{}
+var (
+	db   *gorm.DB
+	once = sync.Once{}
+
+	ErrModelIsNil    = errors.New("Model is nil ")
+	ErrModelNotFound = errors.New("Model not found ")
+)
 
 func GetDB() *gorm.DB {
 	once.Do(func() {
-		dbType := viper.GetString("components.db.type")
 		host := viper.GetString("components.db.host")
 		port := viper.GetString("components.db.port")
 		user := viper.GetString("components.db.user")
+		dbType := viper.GetString("components.db.type")
 		dbName := viper.GetString("components.db.database")
 		password := viper.GetString("components.db.password")
 
