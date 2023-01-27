@@ -1,0 +1,19 @@
+minio:
+  host: http://localhost:9000
+  accessKey: photostudio
+  secretKey: 12345678
+  bucket: photostudio
+components:
+  db:
+    type: postgres
+    host: localhost
+    port: 5432
+    user: pguser
+    password: password
+    database: photostudio
+  access:
+    privateKey: creds/private-key.pem
+  server:
+    port: 8080
+    cors:
+      - localhost:3000

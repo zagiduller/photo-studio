@@ -42,11 +42,8 @@ func (s *Service) GetAll() ([]*Order, error) {
 	return orders, nil
 }
 
-func (s *Service) Create(phone, email, description, name string) (*Order, error) {
+func (s *Service) Create(description, name string) (*Order, error) {
 	order := &Order{
-		db:           s.db,
-		Email:        email,
-		Phone:        phone,
 		Description:  description,
 		CustomerName: name,
 		Status:       OrderStatusNew,

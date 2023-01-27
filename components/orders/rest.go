@@ -13,6 +13,9 @@ import (
 
 // @project photo-studio
 // @created 27.08.2022
+// @author zagiduller
+
+// TODO: Если пользователь не авторизован, то создавать нового пользователя и привязывать к заказу
 
 func (s *Service) FillRouter(r, p *mux.Router) {
 	r.HandleFunc("/", s.CreateOrderHandler).Methods(http.MethodPost, http.MethodOptions)
@@ -78,13 +81,13 @@ func (s *Service) CreateOrderHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+
 	if request.Name == "" {
 		request.Name = "Инкогнито"
 	}
 
 	order, err := s.Create(
-		strings.TrimSpace(request.Phone),
-		strings.TrimSpace(request.Email),
+		// users
 		strings.TrimSpace(request.Description),
 		strings.TrimSpace(request.Name),
 	)

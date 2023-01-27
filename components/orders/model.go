@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/zagiduller/photo-studio/components"
-	"gorm.io/gorm"
+	"os/user"
 )
 
 // @project photo-studio
@@ -27,14 +27,13 @@ var supportedStatuses = []OrderStatus{
 }
 
 type Order struct {
-	gorm.Model
-	db *gorm.DB
+	components.Model
 
 	Status       OrderStatus `gorm:"type:varchar(16)" json:"status"`
+	User         *user.User  `gorm:"foreignKey:UserID" json:"user"`
+	UserID       uint        `json:"user_id"`
 	ManagerID    uint        `json:"manager_id"`
 	Description  string      `gorm:"type:varchar(255)" json:"description"`
-	Email        string      `gorm:"type:varchar(255)" json:"email"`
-	Phone        string      `gorm:"type:varchar(255)" json:"phone"`
 	CustomerName string      `gorm:"type:varchar(255)" json:"customer_name"`
 }
 
@@ -49,11 +48,8 @@ func (o *Order) Validate() error {
 	if o == nil {
 		return ValidateErrorCodeOrderIsNil
 	}
-	if o.db == nil {
+	if o.GetDB() == nil {
 		return components.ErrorCodeDbIsNil
-	}
-	if o.Email == "" && o.Phone == "" {
-		return ValidateErrorCodeEmailOrNameRequired
 	}
 	if !o.CheckStatusIsValid() {
 		return ValidateErrorCodeUnsupportedStatus
@@ -75,7 +71,7 @@ func (o *Order) Save() error {
 	if err := o.Validate(); err != nil {
 		return fmt.Errorf("orders.Save: %w ", err)
 	}
-	if err := o.db.Save(o).Error; err != nil {
+	if err := o.GetDB().Save(o).Error; err != nil {
 		return fmt.Errorf("orders.Save: %w ", err)
 	}
 	return nil

@@ -90,7 +90,7 @@ export default {
         endpoints: {
           login: { url: apiUrl + '/access/login', method: 'post' },
           logout: { url: apiUrl + '/access/logout', method: 'post' },
-          user: { url: apiUrl + '/access/info', method: 'get' }
+          user: { url: apiUrl + '/-/access/info', method: 'get' }
         }
       }
     }
