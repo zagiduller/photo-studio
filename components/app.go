@@ -9,6 +9,7 @@ import (
 
 // @project photo-studio
 // @created 27.08.2022
+// @author arthur
 
 type (
 	Startable interface {
