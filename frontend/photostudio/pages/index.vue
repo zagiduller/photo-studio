@@ -1,17 +1,5 @@
 <template>
   <div class="row mt-3">
-    <b-modal id="order-result" hide-footer>
-      <template #modal-title>
-        Результат
-      </template>
-      <div class="d-block text-center">
-        <h3>{{ order }}</h3>
-        <h3>{{ error }}</h3>
-      </div>
-      <b-button class="mt-3" block @click="$bvModal.hide('order-result')">
-        Close Me
-      </b-button>
-    </b-modal>
     <div v-b-hover="imgHover" class="col-sm-12 col-md-6">
       <b-overlay :show="imgHovered" opacity="0.7">
         <b-img-lazy src="https://picsum.photos/1000/850" fluid alt="Здесь грузится картинка" />
@@ -36,18 +24,8 @@
     <div class="col-sm-12 col-md-6">
       <div class="row justify-content-sm-center mt-2 ">
         <div class="col-sm-10 align-self-center">
-          <div v-if="haveUA">
-            <div class="jumbotron">
-              <b-button
-                size="lg"
-                :disabled="!haveUA"
-                @click="haveUA = false"
-              >
-                У меня нет УЗ (учетный записи)
-              </b-button>
-            </div>
-          </div>
-          <div v-else>
+          <div class="jumbotron">
+            <h4>Новый заказ</h4>
             <OrderCreate />
           </div>
         </div>

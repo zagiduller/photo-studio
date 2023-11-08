@@ -6,6 +6,7 @@ import (
 	"github.com/zagiduller/photo-studio/components"
 	"github.com/zagiduller/photo-studio/components/users"
 	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
 	"net/mail"
 )
 
@@ -47,7 +48,7 @@ func NewLogin(id uint, loginType, value string) *Login {
 }
 
 // CreateLoginPassword create password hash nad save
-func CreateLoginPassword(login *Login, password string) error {
+func CreateLoginPassword(db *gorm.DB, login *Login, password string) error {
 	if &login == nil || login.ID == 0 {
 		return fmt.Errorf("CreateLoginPassword: [%w] ", components.ErrModelIsNil)
 	}
@@ -56,7 +57,7 @@ func CreateLoginPassword(login *Login, password string) error {
 		return fmt.Errorf("CreateLoginPassword: [%w] ", err)
 	}
 	pwd := NewPassword(login.ID, PasswordTypeLoginPassword, string(hash))
-	pwd.SetDB(login.GetDB())
+	pwd.SetDB(db)
 	if err := pwd.Save(); err != nil {
 		return fmt.Errorf("CreateLoginPassword: [%w] ", err)
 	}
@@ -87,12 +88,11 @@ func FindLoginsByUserID(id uint) ([]*Login, error) {
 	return logins, nil
 }
 
-func FindLoginByValue(value string) (*Login, error) {
+func FindLoginByValue(db *gorm.DB, value string) (*Login, error) {
 	login := &Login{}
 	if value == "" {
 		return nil, errors.New("FindLoginByValue: empty value ")
 	}
-	db := components.GetDB()
 	if err := db.Model(&Login{}).Where("value = ?", value).Preload("User").First(login).Error; err != nil {
 		return nil, fmt.Errorf("FindLoginByValue: [%w] ", err)
 	}

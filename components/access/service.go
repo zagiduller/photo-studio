@@ -21,9 +21,13 @@ import (
 
 // @project photo-studio
 // @created 10.08.2022
+// @arthur
 
 type Service struct {
 	components.Default
+
+	ctx context.Context
+
 	db  *gorm.DB
 	pk  *ecdsa.PrivateKey
 	pub crypto.PublicKey
@@ -45,8 +49,9 @@ func (s *Service) ConfigureDependencies(components []components.Component) {
 
 var signingMethod = jwt.SigningMethodES256
 
-func New() *Service {
+func New(ctx context.Context) *Service {
 	return &Service{
+		ctx:     ctx,
 		Default: components.DefaultComponent("access"),
 	}
 }
@@ -108,7 +113,7 @@ func (s *Service) CreateToken(custom jwt.Claims) (string, error) {
 	return t.SignedString(s.pk)
 }
 
-func (s *Service) CreateTokenByLogin(login *Login) (*Access, error) {
+func (s *Service) CreateTokenByLogin(db *gorm.DB, login *Login) (*Access, error) {
 	if login == nil || login.GetUser() == nil {
 		return nil, fmt.Errorf("CreateTokenByUser: [%w] ", components.ErrModelIsNil)
 	}
@@ -131,7 +136,7 @@ func (s *Service) CreateTokenByLogin(login *Login) (*Access, error) {
 	}
 	token := NewAccess(user.ID, tokenString)
 	token.SessionID = sess
-	token.SetDB(user.GetDB())
+	token.SetDB(db)
 	if _, err := s.ValidateToken(tokenString); err != nil {
 		return nil, fmt.Errorf("CreateTokenByUser: [%w]", err)
 	}

@@ -90,7 +90,7 @@ func (s *Service) LoginPasswordHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	login, err := FindLoginByValue(request.Login)
+	login, err := FindLoginByValue(components.GetDB(), request.Login)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusConflict)
 		return
@@ -102,7 +102,7 @@ func (s *Service) LoginPasswordHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	access, err := s.CreateTokenByLogin(login)
+	access, err := s.CreateTokenByLogin(components.GetDB(), login)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -163,7 +163,7 @@ func (s *Service) SingUpPasswordHandler(w http.ResponseWriter, r *http.Request) 
 
 		// create login
 		// Check login is available
-		if l, _ := FindLoginByValue(request.Login); l != nil {
+		if l, _ := FindLoginByValue(tx, request.Login); l != nil {
 			return ErrLoginIsBusy
 		}
 		login := NewLogin(user.ID, LoginTypeEmail, request.Login)
@@ -173,10 +173,11 @@ func (s *Service) SingUpPasswordHandler(w http.ResponseWriter, r *http.Request) 
 		}
 
 		// create password
-		if err := CreateLoginPassword(login, request.Password); err != nil {
+		if err := CreateLoginPassword(tx, login, request.Password); err != nil {
 			return err
 		}
-		_access, err := s.CreateTokenByLogin(login)
+
+		_access, err := s.CreateTokenByLogin(tx, login)
 		if err != nil {
 			return err
 		}

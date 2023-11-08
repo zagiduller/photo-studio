@@ -60,7 +60,8 @@ export default {
       'SkeletonPlugin',
       'FormInputPlugin',
       'FormGroupPlugin',
-      'FormTextareaPlugin'
+      'FormTextareaPlugin',
+      'FormSelectPlugin'
     ]
   },
 

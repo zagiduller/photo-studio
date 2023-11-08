@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/zagiduller/photo-studio/components"
-	"os/user"
+	"github.com/zagiduller/photo-studio/components/users"
 )
 
 // @project photo-studio
@@ -30,11 +30,13 @@ type Order struct {
 	components.Model
 
 	Status       OrderStatus `gorm:"type:varchar(16)" json:"status"`
-	User         *user.User  `gorm:"foreignKey:UserID" json:"user"`
+	User         *users.User `gorm:"foreignKey:UserID" json:"user"`
 	UserID       uint        `json:"user_id"`
 	ManagerID    uint        `json:"manager_id"`
 	Description  string      `gorm:"type:varchar(255)" json:"description"`
 	CustomerName string      `gorm:"type:varchar(255)" json:"customer_name"`
+
+	//Participants []
 }
 
 var (
@@ -46,21 +48,21 @@ var (
 
 func (o *Order) Validate() error {
 	if o == nil {
-		return ValidateErrorCodeOrderIsNil
+		return fmt.Errorf("Order.Validate: [%w]", ValidateErrorCodeOrderIsNil)
 	}
 	if o.GetDB() == nil {
-		return components.ErrorCodeDbIsNil
+		return fmt.Errorf("Order.Validate: [%w]", components.ErrorCodeDbIsNil)
 	}
 	if !o.CheckStatusIsValid() {
-		return ValidateErrorCodeUnsupportedStatus
+		return fmt.Errorf("Order.Validate: [%w]", ValidateErrorCodeUnsupportedStatus)
 	}
 
 	return nil
 }
 
 func (o *Order) CheckStatusIsValid() bool {
-	for _, supportedStatuses := range supportedStatuses {
-		if o.Status == supportedStatuses {
+	for _, sups := range supportedStatuses {
+		if o.Status == sups {
 			return true
 		}
 	}
@@ -69,10 +71,10 @@ func (o *Order) CheckStatusIsValid() bool {
 
 func (o *Order) Save() error {
 	if err := o.Validate(); err != nil {
-		return fmt.Errorf("orders.Save: %w ", err)
+		return fmt.Errorf("Order.Save: [%w] ", err)
 	}
 	if err := o.GetDB().Save(o).Error; err != nil {
-		return fmt.Errorf("orders.Save: %w ", err)
+		return fmt.Errorf("Order.Save: [%w] ", err)
 	}
 	return nil
 }

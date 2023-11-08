@@ -9,6 +9,7 @@ import (
 	"github.com/zagiduller/photo-studio/components/orders"
 	"github.com/zagiduller/photo-studio/components/server"
 	"github.com/zagiduller/photo-studio/components/users"
+	. "github.com/zagiduller/photo-studio/helper"
 	"os"
 	"os/signal"
 )
@@ -23,13 +24,13 @@ func main() {
 		"photo-studio",
 		"0.0.1",
 	)
-	must(app.Add(
-		access.New(),
+	Must(app.Add(
+		access.New(ctx),
 		users.New(),
 		orders.New(),
 		server.New(),
 	))
-	must(app.Configure())
+	Must(app.Configure())
 
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
@@ -57,12 +58,6 @@ func main() {
 func init() {
 	viper.SetConfigFile("config.yaml")
 	if err := viper.ReadInConfig(); err != nil {
-		log.Fatal(err)
-	}
-}
-
-func must(err error) {
-	if err != nil {
 		log.Fatal(err)
 	}
 }

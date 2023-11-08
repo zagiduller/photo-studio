@@ -41,11 +41,12 @@ func (s *Service) GetOrdersHandler(w http.ResponseWriter, _ *http.Request) {
 	}
 }
 
-var rePhone = regexp.MustCompile(`^(?:(?:\(?(?:00|\+)([1-4]\d\d|[1-9]\d?)\)?)?[\-\.\ \\\/]?)?((?:\(?\d{1,}\)?[\-\.\ \\\/]?){0,})(?:[\-\.\ \\\/]?(?:#|ext\.?|extension|x)[\-\.\ \\\/]?(\d+))?$`)
+var rePhone = regexp.MustCompile(`^((8|\+7)[\- ]?)?(\(?\d{3}\)?[\- ]?)?[\d\- ]{7,10}`)
 
 type CreateOrderRequest struct {
 	Name        string `json:"name"`
 	Email       string `json:"email"`
+	City        string `json:"city"`
 	Phone       string `json:"phone"`
 	Description string `json:"description"`
 }
@@ -60,8 +61,11 @@ func (r *CreateOrderRequest) Validate() error {
 			return fmt.Errorf("CreateOrderRequest: [%w]", err)
 		}
 	}
-	if phone != "" && rePhone.MatchString(phone) {
+	if phone == "" || !rePhone.MatchString(phone) {
 		return errors.New("CreateOrderRequest: phone not valid")
+	}
+	if r.City == "" {
+		return errors.New("CreateOrderRequest: city is required")
 	}
 
 	return nil
